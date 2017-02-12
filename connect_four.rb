@@ -24,20 +24,49 @@ class Game
     @inactive_player = @player_2
   end
 
+  def define_players
+    [@player_1, @player_2].each do |player|
+
+      print "Player #{player[:id]}, which piece would you like to be? > "
+      player[:character] = gets.chomp
+      until player[:character].length == 1
+        print "Please input only one character as your game piece > "
+        player[:character] = gets.chomp
+      end
+
+      print "Would you like to be a computer? > "
+      response = gets.chomp.downcase
+      while player[:is_computer].nil?
+        if response == "yes" || response == "y"
+          player[:is_computer] = true
+        elsif response == "no" || response == "n"
+          player[:is_computer] = false
+        else
+          print "Please type 'yes' or 'no' > "
+          response = gets.chomp.downcase
+        end
+      end
+
+      puts
+    end
+  end
+
   def switch_players
     @active_player, @inactive_player = @inactive_player, @active_player
   end
 
   def get_column_number
-    loop do
-      print "Which column? > "
-      input = gets.chomp.to_i
-      if (1..7) === input
-        return input - 1
-      else
-        puts "Please enter a number between 1 and 7."
+
+    if @active_player[:is_computer]
+      column = rand(0...7)
+    else
+      column = ""
+      until (1..7) === column
+        print "Which column? > "
+        column = gets.chomp.to_i
       end
     end
+    column
   end
 
   def place_tile
@@ -69,15 +98,16 @@ class Game
     # Print column numbers at the bottom
     (1..@board_width).each { |num| print "#{num} "}
     puts
+    puts
   end
 
   def winner
-    puts "\nPlayer #{@active_player[:id]} wins!"
+    puts "Player #{@active_player[:id]} wins!"
     exit
   end
 
   def tie
-    puts "\nIt's a tie! GAME OVER"
+    puts "It's a tie! GAME OVER"
     exit
   end
 
@@ -139,9 +169,10 @@ class Game
   end
 
   def play
+    define_players
     print_board
     loop do
-      puts "\nPlayer #{@active_player[:id]} GO!"
+      puts "Player #{@active_player[:id]} GO!"
       place_tile
       print_board
       check_for_win
