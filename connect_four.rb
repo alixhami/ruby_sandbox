@@ -1,12 +1,15 @@
+require 'colorize'
+
 class Game
+
   def initialize
     @board = [
-      ["-","-","-","-","-","-","-"],
-      ["-","-","-","-","-","-","-"],
-      ["-","-","-","-","-","-","-"],
-      ["-","-","-","-","-","-","-"],
-      ["-","-","-","-","-","-","-"],
-      ["-","-","-","-","-","-","-"]
+      ["▢","▢","▢","▢","▢","▢","▢"],
+      ["▢","▢","▢","▢","▢","▢","▢"],
+      ["▢","▢","▢","▢","▢","▢","▢"],
+      ["▢","▢","▢","▢","▢","▢","▢"],
+      ["▢","▢","▢","▢","▢","▢","▢"],
+      ["▢","▢","▢","▢","▢","▢","▢"]
     ]
     @board_width = @board[0].length
     @board_height = @board.length
@@ -14,11 +17,13 @@ class Game
 
     @player_1 = {
       id: 1,
-      character: "X"
+      character: "◉",
+      color: :blue
     }
     @player_2 = {
       id: 2,
-      character: "O"
+      character: "◎",
+      color: :red
     }
     @active_player = @player_1
     @inactive_player = @player_2
@@ -27,14 +32,7 @@ class Game
   def define_players
     [@player_1, @player_2].each do |player|
 
-      print "Player #{player[:id]}, which piece would you like to be? > "
-      player[:character] = gets.chomp
-      until player[:character].length == 1
-        print "Please input only one character as your game piece > "
-        player[:character] = gets.chomp
-      end
-
-      print "Would you like to be a computer? > "
+      print "Player #{player[:id]}, would you like to be a computer? > "
       response = gets.chomp.downcase
       while player[:is_computer].nil?
         if response == "yes" || response == "y"
@@ -47,8 +45,8 @@ class Game
         end
       end
 
-      puts
     end
+    puts
   end
 
   def switch_players
@@ -58,14 +56,15 @@ class Game
   def get_column_number
 
     if @active_player[:is_computer]
-      column = rand(0...7)
+      column = rand(0...@board_width)
     else
       column = ""
-      until (1..7) === column
+      until (0...@board_width).to_a.include? column
         print "Which column? > "
-        column = gets.chomp.to_i
+        column = gets.chomp.to_i - 1
       end
     end
+
     column
   end
 
@@ -73,7 +72,7 @@ class Game
     column = get_column_number
     row = @board_height - 1
     loop do
-      if @board[row][column] == "-"
+      if @board[row][column] == "▢"
         @board[row][column] = @active_player[:character]
         @plays_remaining -= 1
         break
@@ -89,14 +88,25 @@ class Game
   end
 
   def print_board
+    white_space = " ".colorize(:background => :light_white)
     @board.each do |row|
+      print " ".colorize(:background => :light_white)
       row.each do |character|
-        print character, " "
+        if character == @player_1[:character]
+          color = @player_1[:color]
+        elsif character == @player_2[:character]
+          color = @player_2[:color]
+        else
+          color = :white
+        end
+        print character.colorize(color).on_light_white, white_space
       end
       puts
     end
     # Print column numbers at the bottom
-    (1..@board_width).each { |num| print "#{num} "}
+    puts ("-" * ((@board_width * 2) + 1)).colorize(:black).on_light_white.bold
+    print white_space
+    (1..@board_width).each { |num| print "#{num} ".colorize(:black).on_light_white.bold }
     puts
     puts
   end
